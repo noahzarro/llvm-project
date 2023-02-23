@@ -200,6 +200,9 @@ void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
     // Currently we support the v0.11 RISC-V V intrinsics.
     Builder.defineMacro("__riscv_v_intrinsic", Twine(getVersionValue(0, 11)));
   }
+
+  if (ISAInfo->hasExtension("e"))
+    Builder.defineMacro("__riscv_32e");
 }
 
 static constexpr Builtin::Info BuiltinInfo[] = {
@@ -315,6 +318,11 @@ bool RISCVTargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
   if (ABI.empty())
     ABI = ISAInfo->computeDefaultABI().str();
 
+  if (ABI == "ilp32e" && ISAInfo->hasExtension("d")) {
+    Diags.Report(diag::err_invalid_feature_combination)
+        << "ILP32E must not be used with the D ISA extension";
+    return false;
+  }
   return true;
 }
 
