@@ -10299,16 +10299,16 @@ static const MCPhysReg FastCCEGPRs[] = {RISCV::X10, RISCV::X11, RISCV::X12,
 
 static ArrayRef<MCPhysReg> getCallingConvArgGPRs(const RISCVABI::ABI ABI) {
   if (ABI == RISCVABI::ABI_ILP32E)
-    return ArrayRef(ArgEGPRs);
+    return ArrayRef<MCPhysReg>(ArgEGPRs);
 
-  return ArrayRef(ArgIGPRs);
+  return ArrayRef<MCPhysReg>(ArgIGPRs);
 }
 
 static ArrayRef<MCPhysReg> getFastCCGPRs(const RISCVABI::ABI ABI) {
   if (ABI == RISCVABI::ABI_ILP32E)
-    return ArrayRef(FastCCEGPRs);
+    return ArrayRef<MCPhysReg>(FastCCEGPRs);
 
-  return ArrayRef(FastCCIGPRs);
+  return ArrayRef<MCPhysReg>(FastCCIGPRs);
 }
 
 static Register getCallingConvLastArgGPR(const RISCVABI::ABI ABI) {
@@ -10461,7 +10461,7 @@ static bool CC_RISCV(const DataLayout &DL, RISCVABI::ABI ABI, unsigned ValNo,
       ABI != RISCVABI::ABI_ILP32E) {
     unsigned RegIdx = State.getFirstUnallocated(ArgGPRs);
     // Skip 'odd' register if necessary.
-    if (RegIdx != array_lengthof(ArgGPRs) && RegIdx % 2 == 1)
+    if (RegIdx != llvm::size(ArgGPRs) && RegIdx % 2 == 1)
       State.AllocateReg(ArgGPRs);
   }
 
@@ -10828,18 +10828,10 @@ static bool CC_RISCV_FastCC(const DataLayout &DL, RISCVABI::ABI ABI,
                             ISD::ArgFlagsTy ArgFlags, CCState &State,
                             bool IsFixed, bool IsRet, Type *OrigTy,
                             const RISCVTargetLowering &TLI,
-<<<<<<< HEAD
                             Optional<unsigned> FirstMaskArgument) {
 
-  // X5 and X6 might be used for save-restore libcall.
-  static const MCPhysReg GPRList[] = {
-      RISCV::X10, RISCV::X11, RISCV::X12, RISCV::X13, RISCV::X14,
-      RISCV::X15, RISCV::X16, RISCV::X17, RISCV::X7,  RISCV::X28,
-      RISCV::X29, RISCV::X30, RISCV::X31};
 
-=======
-                            std::optional<unsigned> FirstMaskArgument) {
->>>>>>> 89922ff11e61... added e extension
+
   if (LocVT == MVT::i32 || LocVT == MVT::i64) {
     if (unsigned Reg = State.AllocateReg(getFastCCGPRs(ABI))) {
       State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
